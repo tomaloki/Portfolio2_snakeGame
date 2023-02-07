@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Snake game</title>
+        <script src="/socket.io/socket.io.js"></script>
+
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+            crossorigin="anonymous"
+        />
+
+        <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+-->
+        <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+    </head>
+
+    <body style="text-align: center" class="d-flex flex-column justify-content-center vh-100">
+        <div class="top-buttons" style="position: absolute; top: 10px; right: 20px">
+            <div id="sound-div" class="btn btn-basic">
+                <span class="sound-item" id="sound-speaker"></span>
+                <span class="sound-item" id="sound-description"></span>
+            </div>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
+                How to play
+            </button>
+        </div>
+
+        <div id="homescreen" style="margin-top: -50px">
+            <img class="logo" src="img/snakeLogo.png" />
+            <br />
+
+            <br />
+            <input
+                id="userName"
+                required
+                type="text"
+                placeholder="Enter username"
+                style="padding: 10px; text-align: center"
+            />
+            <br />
+            <br />
+            <button
+                id="playButtonSingle"
+                class="btn btn-outline-success btn-lg"
+                style="padding: 10px; text-align: center"
+            >
+                Singleplayer
+            </button>
+            <button
+                id="playButtonMulti"
+                class="btn btn-outline-danger btn-lg"
+                style="padding: 10px; text-align: center"
+            >
+                Multiplayer
+            </button>
+        </div>
+        <div id="multiMenyScreen" style="display: none">
+            <img class="logo" src="img/snakeLogo.png" />
+            <br />
+            <button
+                id="joinAnyLobby"
+                class="btn btn-outline-success btn-lg"
+                style="padding: 10px; text-align: center"
+            >
+                Play
+            </button>
+            <button
+                id="createLobby"
+                class="btn btn-outline-success btn-lg"
+                style="padding: 10px; text-align: center"
+            >
+                Create Lobby
+            </button>
+            <br />
+            <br />
+
+            <input
+                id="joinInputText"
+                required
+                type="text"
+                placeholder="Lobby ID"
+                style="text-align: center; padding: 10px"
+            />
+            <br />
+            <br />
+            <button
+                id="join-button"
+                class="btn btn-outline-success btn-lg"
+                style="padding: 10px; text-align: center"
+            >
+                Join Lobby
+            </button>
+        </div>
+
+        <br />
+        <div id="gameScreen" style="display: none">
+            <div class="gameDiv">
+                <div class="scoreDiv" style="text-align: left">
+                    <h4 id="scoreList"></h4>
+                    <ul id="userList"></ul>
+                    <br />
+                    <br />
+                    <h4 id="highScoreLbl"></h4>
+
+                    <ol id="highScoreListSingle"></ol>
+                    <ol id="highScoreListMulti"></ol>
+                </div>
+
+                <div id="playDiv" class="playDiv" style="margin: 0 auto">
+                    <canvas id="canvas"></canvas>
+                    <br />
+                    <br />
+
+                    <div id="waitingForPlayers" style="display: none; text-align: center">
+                        <p>We need 2 snakes to start! Waiting more snakezzz...</p>
+                    </div>
+                    <div id="playDivApple"></div>
+                    <div id="playDivMonster"></div>
+                    <div id="playDivSnakehead"></div>
+                    <div id="playDivLaser"></div>
+                </div>
+
+                <div style="display: table-cell">
+                    <h4 id="lobbyIDHeadline" style="text-align: right; padding: 25px"></h4>
+                    <ul id="lobbyID" style="padding-right: 25px"></ul>
+                </div>
+            </div>
+        </div>
+        <div
+            id="finishScreen"
+            style="
+                display: none;
+                margin: 0 auto;
+                width: 500px;
+                height: 500px;
+                background-color: #2f2f2f;
+                text-align: center;
+            "
+        >
+            <br /><br /><br /><br /><br /><br /><br />
+            <p style="font-size: 50px; color: aliceblue">Game Over</p>
+            <button id="game-over" class="btn btn-outline-success btn-lg">EXIT</button>
+        </div>
+
+        <div id="instructions">
+            <div class="modal fade" id="myModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" style="text-align: center; padding: 10px">
+                                How to Play!
+                            </h4>
+                            <button type="button" class="close" data-dismiss="modal">×</button>
+                        </div>
+
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    Move your snake with the arrow keys and try to avoid the bots,
+                                    monsters or other players! Eat food to grow, try to become the
+                                    longest snake on the board!
+                                </li>
+                                <li class="list-group-item">Move: ARROW KEYS</li>
+                                <li class="list-group-item">Shoot: SPACE BAR</li>
+                            </ul>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button
+                                id="exitInstructions"
+                                class="btn btn-info"
+                                data-toggle="modal"
+                                data-target="#myModal"
+                            >
+                                Got it!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br />
+        <br />
+
+        <br />
+        <br />
+
+        <script src="frontend.js"></script>
+    </body>
+</html>

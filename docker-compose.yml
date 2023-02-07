@@ -1,0 +1,19 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+      - "3000:3000"
+    volumes:
+      - "./frontend:/frontend:rw"
+      - "./server:/server:rw"
+    links:
+      - redis
+  redis:
+    image: snakes-with-guns
+volumes:
+  logvolume01: {}
+
+
+  # docker-compose up -d
